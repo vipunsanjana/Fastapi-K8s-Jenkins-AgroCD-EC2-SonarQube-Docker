@@ -1,8 +1,11 @@
 
+
+
+
 pipeline {
   agent {
     docker {
-      image 'vipunsanjana/python-docker:3.11'
+      image 'python:3.11-slim'
       args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
     }
   }
@@ -44,10 +47,10 @@ pipeline {
     }
 
     stage('Update Deployment File') {
-      environment {
+            environment {
             GIT_REPO_NAME = "Fastapi-K8s-Jenkins-AgroCD-EC2-SonarQube-Docker"
             GIT_USER_NAME = "vipunsanjana"
-      }
+        }
       steps {
         withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
           sh '''
