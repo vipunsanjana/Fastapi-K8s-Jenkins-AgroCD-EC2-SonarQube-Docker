@@ -16,20 +16,15 @@ pipeline {
       }
     }
 
-    stage('Install Dependencies') {
-      steps {
-        sh '''
-          pip install --upgrade pip
-          pip install -r requirements.txt
-        '''
-      }
-    }
-
     stage('Build and Push Docker Image') {
       steps {
         script {
+          // Build Docker image (Dockerfile installs dependencies)
           sh "docker build -t ${DOCKER_IMAGE} ."
+
           def dockerImage = docker.image("${DOCKER_IMAGE}")
+
+          // Login & push image to Docker Hub
           docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-creds') {
             dockerImage.push()
           }
@@ -38,10 +33,10 @@ pipeline {
     }
 
     stage('Update Deployment File') {
-        environment {
-            GIT_REPO_NAME = "Fastapi-K8s-Jenkins-AgroCD-EC2-SonarQube-Docker"
-            GIT_USER_NAME = "vipunsanjana"
-        }
+      environment {
+        GIT_REPO_NAME = "Fastapi-K8s-Jenkins-AgroCD-EC2-SonarQube-Docker"
+        GIT_USER_NAME = "vipunsanjana"
+      }
       steps {
         withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
           sh '''
