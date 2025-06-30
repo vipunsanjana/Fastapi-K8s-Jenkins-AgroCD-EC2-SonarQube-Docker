@@ -44,14 +44,14 @@ pipeline {
     stage('Update Deployment File') {
       steps {
         withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-          sh """
+          sh '''
             git config user.email "vipunsanjana34@gmail.com"
             git config user.name "vipunsanjana"
-            sed -i "s/replaceImageTag/${IMAGE_TAG}/g" k8s/deployment.yaml
-            git add k8s/deployment.yaml
+            sed -i "s/replaceImageTag/${IMAGE_TAG}/g" k8/deployment.yaml
+            git add k8/deployment.yaml
             git commit -m "Update deployment to image tag ${IMAGE_TAG}"
             git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
-          """
+          '''
         }
       }
     }
