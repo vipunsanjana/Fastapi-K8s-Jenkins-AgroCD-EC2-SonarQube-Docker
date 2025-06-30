@@ -1,15 +1,8 @@
 pipeline {
-  agent {
-    docker {
-      image 'python:3.11-slim'
-      args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
-    }
-  }
-
+  agent any
   environment {
     APP_NAME = "fastapi-crud"
     DOCKER_IMAGE = "vipunsanjana/fastapi-crud:1"
-    // SONAR_URL = "http://127.0.0.1:9000"
     REGISTRY_CREDENTIALS = credentials('docker-cred')
     GIT_REPO_NAME = "Fastapi-K8s-Jenkins-AgroCD-EC2-SonarQube-Docker"
     GIT_USER_NAME = "vipunsanjana"
@@ -24,28 +17,16 @@ pipeline {
 
     stage('Install Dependencies') {
       steps {
-        sh '''
-          pip install --upgrade pip
-          pip install -r requirements.txt
-        '''
+        script {
+          docker.image('python:3.11-slim').inside('--user root') {
+            sh '''
+              pip install --upgrade pip
+              pip install -r requirements.txt
+            '''
+          }
+        }
       }
     }
-
-    // stage('Static Code Analysis') {
-    //   steps {
-    //     withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
-    //       sh '''
-    //         pip install sonar-scanner-cli
-    //         sonar-scanner \
-    //           -Dsonar.projectKey=${APP_NAME} \
-    //           -Dsonar.sources=app \
-    //           -Dsonar.python.version=3.11 \
-    //           -Dsonar.host.url=${SONAR_URL} \
-    //           -Dsonar.login=${SONAR_AUTH_TOKEN}
-    //       '''
-    //     }
-    //   }
-    // }
 
     stage('Build and Push Docker Image') {
       steps {
