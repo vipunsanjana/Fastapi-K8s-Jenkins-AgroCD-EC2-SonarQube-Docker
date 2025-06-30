@@ -5,6 +5,7 @@ pipeline {
     APP_NAME = "fastapi-crud"
     DOCKER_IMAGE = "vipunsanjana/fastapi-crud"
     IMAGE_TAG = "one"
+    FULL_IMAGE = "${DOCKER_IMAGE}:${IMAGE_TAG}"
     REGISTRY_CREDENTIALS = credentials('dockerhub-creds')
     GIT_REPO_NAME = "Fastapi-K8s-Jenkins-AgroCD-EC2-SonarQube-Docker"
     GIT_USER_NAME = "vipunsanjana"
@@ -20,38 +21,37 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         script {
-          def fullImage = "${env.DOCKER_IMAGE}:${env.IMAGE_TAG}"
-          sh 'docker build -t ${fullImage} .'
+          sh "docker build -t ${FULL_IMAGE} ."
         }
       }
     }
 
     stage('Push to Docker Hub') {
-      steps {
-        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-          script {
-            def fullImage = "${env.DOCKER_IMAGE}:${env.IMAGE_TAG}"
-            sh '''
-              echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-              docker push ${fullImage}
-              
-            '''
-          }
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    script {
+                        sh """
+                            echo "Logging in to Docker Hub..."
+                            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                            docker push ${FULL_IMAGE}
+                            echo "Docker image ${FULL_IMAGE} pushed successfully."
+                        """
+                    }
+                }
+            }
         }
-      }
-    }
 
     stage('Update Deployment File') {
       steps {
         withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-          sh '''
+          sh """
             git config user.email "vipunsanjana34@gmail.com"
             git config user.name "vipunsanjana"
             sed -i "s/replaceImageTag/${IMAGE_TAG}/g" k8s/deployment.yaml
             git add k8s/deployment.yaml
             git commit -m "Update deployment to image tag ${IMAGE_TAG}"
             git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
-          '''
+          """
         }
       }
     }
