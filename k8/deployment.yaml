@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-crud
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fastapi-crud
+  template:
+    metadata:
+      labels:
+        app: fastapi-crud
+    spec:
+      containers:
+      - name: fastapi-crud
+        image: vipunsanjana/fastapi-crud:replaceImageTag
+        ports:
+        - containerPort: 80

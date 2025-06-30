@@ -1,14 +1,15 @@
 pipeline {
   agent {
     docker {
-      image 'docker:24.0.2-cli'
+      image 'python:3.11-slim'
       args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
     }
   }
 
   environment {
     APP_NAME = "fastapi-crud"
-    DOCKER_IMAGE = "vipunsanjana/fastapi-crud:${BUILD_NUMBER}"
+    DOCKER_IMAGE = "vipunsanjana/fastapi-crud:one"
+    // SONAR_URL = "http://127.0.0.1:9000"
     REGISTRY_CREDENTIALS = credentials('docker-cred')
     GIT_REPO_NAME = "Fastapi-K8s-Jenkins-AgroCD-EC2-SonarQube-Docker"
     GIT_USER_NAME = "vipunsanjana"
@@ -21,17 +22,37 @@ pipeline {
       }
     }
 
+    stage('Install Dependencies') {
+      steps {
+        sh '''
+          pip install --upgrade pip
+          pip install -r requirements.txt
+        '''
+      }
+    }
+
+    // stage('Static Code Analysis') {
+    //   steps {
+    //     withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
+    //       sh '''
+    //         pip install sonar-scanner-cli
+    //         sonar-scanner \
+    //           -Dsonar.projectKey=${APP_NAME} \
+    //           -Dsonar.sources=app \
+    //           -Dsonar.python.version=3.11 \
+    //           -Dsonar.host.url=${SONAR_URL} \
+    //           -Dsonar.login=${SONAR_AUTH_TOKEN}
+    //       '''
+    //     }
+    //   }
+    // }
+
     stage('Build and Push Docker Image') {
       steps {
         script {
-          sh 'apk add --no-cache python3 py3-pip'  // install python & pip in docker CLI image
-          sh '''
-            pip3 install --upgrade pip
-            pip3 install -r requirements.txt
-          '''
           sh "docker build -t ${DOCKER_IMAGE} ."
           def dockerImage = docker.image("${DOCKER_IMAGE}")
-          docker.withRegistry('https://index.docker.io/v1/', REGISTRY_CREDENTIALS) {
+          docker.withRegistry('https://index.docker.io/v1/', 'docker-cred') {
             dockerImage.push()
           }
         }
@@ -44,9 +65,9 @@ pipeline {
           sh '''
             git config user.email "vipunsanjana34@gmail.com"
             git config user.name "vipunsanjana"
-            sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" k8s/deployment.yaml
+            sed -i "s/replaceImageTag/one/g" k8s/deployment.yaml
             git add k8s/deployment.yaml
-            git commit -m "Update deployment to image tag ${BUILD_NUMBER}"
+            git commit -m "Update deployment to image tag one"
             git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
           '''
         }
