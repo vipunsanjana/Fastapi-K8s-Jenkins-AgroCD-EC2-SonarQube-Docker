@@ -1,14 +1,5 @@
-
-
-
-
 pipeline {
-  agent {
-    docker {
-      image 'python:3.11-slim'
-      args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
-    }
-  }
+  agent any
 
   environment {
     APP_NAME = "fastapi-crud"
@@ -47,7 +38,7 @@ pipeline {
     }
 
     stage('Update Deployment File') {
-            environment {
+        environment {
             GIT_REPO_NAME = "Fastapi-K8s-Jenkins-AgroCD-EC2-SonarQube-Docker"
             GIT_USER_NAME = "vipunsanjana"
         }
