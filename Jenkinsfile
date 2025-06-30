@@ -61,7 +61,7 @@ pipeline {
 
     stage('Update Deployment File') {
         environment {
-            GIT_REPO_NAME = "    Fastapi-K8s-Jenkins-AgroCD-EC2-SonarQube-Docker"
+            GIT_REPO_NAME = "Fastapi-K8s-Jenkins-AgroCD-EC2-SonarQube-Docker"
             GIT_USER_NAME = "vipunsanjana"
         }
       steps {
