@@ -1,7 +1,7 @@
 pipeline {
   agent {
     docker {
-      image 'python:3.11-slim'
+      image 'docker:24.0.2-cli'
       args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
     }
   }
@@ -21,18 +21,14 @@ pipeline {
       }
     }
 
-    stage('Install Dependencies') {
-      steps {
-        sh '''
-          pip install --upgrade pip
-          pip install -r requirements.txt
-        '''
-      }
-    }
-
     stage('Build and Push Docker Image') {
       steps {
         script {
+          sh 'apk add --no-cache python3 py3-pip'  // install python & pip in docker CLI image
+          sh '''
+            pip3 install --upgrade pip
+            pip3 install -r requirements.txt
+          '''
           sh "docker build -t ${DOCKER_IMAGE} ."
           def dockerImage = docker.image("${DOCKER_IMAGE}")
           docker.withRegistry('https://index.docker.io/v1/', REGISTRY_CREDENTIALS) {
