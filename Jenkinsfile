@@ -5,6 +5,7 @@ pipeline {
     APP_NAME = "fastapi-crud"
     DOCKER_IMAGE = "vipunsanjana/fastapi-crud"
     IMAGE_TAG = "one"
+    //SONAR_URL = "http://34.201.116.83:9000"
     FULL_IMAGE = "${DOCKER_IMAGE}:${IMAGE_TAG}"
     REGISTRY_CREDENTIALS = credentials('dockerhub-creds')
     GIT_REPO_NAME = "Fastapi-K8s-Jenkins-AgroCD-EC2-SonarQube-Docker"
@@ -17,6 +18,23 @@ pipeline {
         checkout scm
       }
     }
+    
+    // stage('Static Code Analysis') {
+    //   steps {
+    //     withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
+    //       script {
+    //         sh '''
+    //           sonar-scanner \
+    //             -Dsonar.projectKey=fastapi-crud \
+    //             -Dsonar.sources=app \
+    //             -Dsonar.python.version=3.11 \
+    //             -Dsonar.host.url=${SONAR_URL} \
+    //             -Dsonar.login=${SONAR_AUTH_TOKEN}
+    //         '''
+    //       }
+    //     }
+    //   }
+    // }
 
     stage('Build Docker Image') {
       steps {
