@@ -1,8 +1,14 @@
 pipeline {
-  agent any
+  agent {
+    docker {
+      image 'python:3.11-slim'
+      args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
+    }
+  }
+
   environment {
     APP_NAME = "fastapi-crud"
-    DOCKER_IMAGE = "vipunsanjana/fastapi-crud:1"
+    DOCKER_IMAGE = "vipunsanjana/fastapi-crud:${BUILD_NUMBER}"
     REGISTRY_CREDENTIALS = credentials('docker-cred')
     GIT_REPO_NAME = "Fastapi-K8s-Jenkins-AgroCD-EC2-SonarQube-Docker"
     GIT_USER_NAME = "vipunsanjana"
@@ -17,14 +23,10 @@ pipeline {
 
     stage('Install Dependencies') {
       steps {
-        script {
-          docker.image('python:3.11-slim').inside('--user root') {
-            sh '''
-              pip install --upgrade pip
-              pip install -r requirements.txt
-            '''
-          }
-        }
+        sh '''
+          pip install --upgrade pip
+          pip install -r requirements.txt
+        '''
       }
     }
 
@@ -33,7 +35,7 @@ pipeline {
         script {
           sh "docker build -t ${DOCKER_IMAGE} ."
           def dockerImage = docker.image("${DOCKER_IMAGE}")
-          docker.withRegistry('https://index.docker.io/v1/', 'docker-cred') {
+          docker.withRegistry('https://index.docker.io/v1/', REGISTRY_CREDENTIALS) {
             dockerImage.push()
           }
         }
