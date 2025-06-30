@@ -31,21 +31,21 @@ A modular FastAPI application demonstrating CRUD operations on items, designed f
 
 ## 🧱 Project Structure
 
-fastapi-crud/
-├── app/
-│   ├── main.py                # Entry point for FastAPI app
-│   ├── models.py              # Pydantic data models
-│   ├── db.py                  # In-memory DB or database logic
-│   └── routes.py              # API route definitions
-├── requirements.txt           # Python dependencies
-├── Dockerfile                 # Docker build file (with venv support)
-├── Jenkinsfile                # Jenkins pipeline definition
-├── k8s/
-│   ├── deployment.yaml        # Kubernetes Deployment manifest
-│   └── service.yaml           # Kubernetes Service manifest
-├── .gitignore                 # Git ignore rules
-├── .dockerignore              # Docker build ignore rules
-└── README.md                  # Project documentation
+- fastapi-crud/
+- ├── app/
+- │   ├── main.py                # Entry point for FastAPI app
+- │   ├── models.py              # Pydantic data models
+- │   ├── db.py                  # In-memory DB or database logic
+- │   └── routes.py              # API route definitions
+- ├── requirements.txt           # Python dependencies
+- ├── Dockerfile                 # Docker build file (with venv support)
+- ├── Jenkinsfile                # Jenkins pipeline definition
+- ├── k8s/
+- │   ├── deployment.yaml        # Kubernetes Deployment manifest
+- │   └── service.yaml           # Kubernetes Service manifest
+- ├── .gitignore                 # Git ignore rules
+- ├── .dockerignore              # Docker build ignore rules
+- └── README.md                  # Project documentation
 
 ---
 

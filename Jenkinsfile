@@ -8,8 +8,8 @@ pipeline {
 
   environment {
     APP_NAME = "fastapi-crud"
-    DOCKER_IMAGE = "vipunsanjana/fastapi-crud:${BUILD_NUMBER}"
-    SONAR_URL = "http://<your-sonarqube-ip>:9000"
+    DOCKER_IMAGE = "vipunsanjana/fastapi-crud:1"
+    // SONAR_URL = "http://127.0.0.1:9000"
     REGISTRY_CREDENTIALS = credentials('docker-cred')
     GIT_REPO_NAME = "Fastapi-K8s-Jenkins-AgroCD-EC2-SonarQube-Docker"
     GIT_USER_NAME = "vipunsanjana"
@@ -31,21 +31,21 @@ pipeline {
       }
     }
 
-    stage('Static Code Analysis') {
-      steps {
-        withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
-          sh '''
-            pip install sonar-scanner-cli
-            sonar-scanner \
-              -Dsonar.projectKey=${APP_NAME} \
-              -Dsonar.sources=app \
-              -Dsonar.python.version=3.11 \
-              -Dsonar.host.url=${SONAR_URL} \
-              -Dsonar.login=${SONAR_AUTH_TOKEN}
-          '''
-        }
-      }
-    }
+    // stage('Static Code Analysis') {
+    //   steps {
+    //     withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
+    //       sh '''
+    //         pip install sonar-scanner-cli
+    //         sonar-scanner \
+    //           -Dsonar.projectKey=${APP_NAME} \
+    //           -Dsonar.sources=app \
+    //           -Dsonar.python.version=3.11 \
+    //           -Dsonar.host.url=${SONAR_URL} \
+    //           -Dsonar.login=${SONAR_AUTH_TOKEN}
+    //       '''
+    //     }
+    //   }
+    // }
 
     stage('Build and Push Docker Image') {
       steps {
@@ -63,8 +63,8 @@ pipeline {
       steps {
         withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
           sh '''
-            git config user.email "you@example.com"
-            git config user.name "Your Name"
+            git config user.email "vipunsanjana34@gmail.com"
+            git config user.name "vipunsanjana"
             sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" k8s/deployment.yaml
             git add k8s/deployment.yaml
             git commit -m "Update deployment to image tag ${BUILD_NUMBER}"
