@@ -4,7 +4,7 @@ pipeline {
   environment {
     APP_NAME = "fastapi-crud"
     DOCKER_IMAGE = "vipunsanjana/fastapi-crud:one"
-    REGISTRY_CREDENTIALS = credentials('docker-creds')
+    REGISTRY_CREDENTIALS = credentials('dockerhub-creds')
     GIT_REPO_NAME = "Fastapi-K8s-Jenkins-AgroCD-EC2-SonarQube-Docker"
     GIT_USER_NAME = "vipunsanjana"
   }
@@ -30,7 +30,7 @@ pipeline {
         script {
           sh "docker build -t ${DOCKER_IMAGE} ."
           def dockerImage = docker.image("${DOCKER_IMAGE}")
-          docker.withRegistry('https://index.docker.io/v1/', 'docker-creds') {
+          docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-creds') {
             dockerImage.push()
           }
         }
