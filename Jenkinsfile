@@ -3,7 +3,9 @@ pipeline {
 
   environment {
     APP_NAME = "fastapi-crud"
-    DOCKER_IMAGE = "vipunsanjana/fastapi-crud:one"
+    DOCKER_IMAGE = "vipunsanjana/fastapi-crud"
+    IMAGE_TAG = "one"
+    FULL_IMAGE = "${DOCKER_IMAGE}:${IMAGE_TAG}"
     REGISTRY_CREDENTIALS = credentials('dockerhub-creds')
     GIT_REPO_NAME = "Fastapi-K8s-Jenkins-AgroCD-EC2-SonarQube-Docker"
     GIT_USER_NAME = "vipunsanjana"
@@ -16,37 +18,39 @@ pipeline {
       }
     }
 
-    stage('Build and Push Docker Image') {
+    stage('Build Docker Image') {
       steps {
         script {
-          // Build Docker image (Dockerfile installs dependencies)
-          sh "docker build -t ${DOCKER_IMAGE} ."
+          sh "docker build -t ${FULL_IMAGE} ."
+        }
+      }
+    }
 
-          def dockerImage = docker.image("${DOCKER_IMAGE}")
-
-          // Login & push image to Docker Hub
-          docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-creds') {
-            dockerImage.push()
+    stage('Push Docker Image') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+          script {
+            sh """
+              echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+              docker push ${FULL_IMAGE}
+              docker logout
+            """
           }
         }
       }
     }
 
     stage('Update Deployment File') {
-      environment {
-        GIT_REPO_NAME = "Fastapi-K8s-Jenkins-AgroCD-EC2-SonarQube-Docker"
-        GIT_USER_NAME = "vipunsanjana"
-      }
       steps {
         withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-          sh '''
+          sh """
             git config user.email "vipunsanjana34@gmail.com"
             git config user.name "vipunsanjana"
-            sed -i "s/replaceImageTag/one/g" k8s/deployment.yaml
+            sed -i "s/replaceImageTag/${IMAGE_TAG}/g" k8s/deployment.yaml
             git add k8s/deployment.yaml
-            git commit -m "Update deployment to image tag one"
+            git commit -m "Update deployment to image tag ${IMAGE_TAG}"
             git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
-          '''
+          """
         }
       }
     }
